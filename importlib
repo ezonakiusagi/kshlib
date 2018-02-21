@@ -1,0 +1,49 @@
+function importlib
+{
+    typeset OIFS
+    typeset _fpath
+    typeset _fpath_new
+    typeset -a _libpaths=()
+    typeset -i _found=0
+
+    while [[ -n $1 ]]
+    do
+	if [[ $1 == /* ]] && [[ -d $1 ]] ; then
+	    # if library path is absolute, then check that it
+	    # is a directory and if so, just add it to FPATH
+	    FPATH=$FPATH:${1}
+	else
+	    # if not an absolute path, search for it in current
+	    # FPATH
+	    OIFS=$IFS && IFS=:
+	    for _fpath in $FPATH
+	    do
+		if [[ -d ${_fpath}/${1} ]] ; then
+		    _libpaths+=( ${_fpath}/${1} )
+		fi
+	    done
+	    # check that we don't already have it in FPATH
+	    for _fpath_new in ${_libpaths[*]}
+	    do
+		_found=0
+		for _fpath in $FPATH
+		do
+		    if [[ ${_fpath_new} == ${_fpath} ]] ; then
+			_found=1
+		    fi
+		done
+		# only add _fpath_new to FPATH if it doesn't
+		# already exist
+		if (( $_found == 0 )) ; then
+		    FPATH=$FPATH:${_fpath_new}
+		else
+		    print -u2 "${_fpath_new} already in FPATH"
+		fi
+	    done
+	    IFS=$OIFS
+	fi
+	shift
+    done
+
+    return 0
+}
