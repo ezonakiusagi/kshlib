@@ -1,0 +1,11 @@
+This is a kornshell93 function library to interface with sqlite3
+databases. It is developed and tested with ksh 93u+.
+
+This is a place holder to remind me to write a short guide on
+how to use these functions.
+
+need to mention:
+- using FPATH
+- setting up compound variables to store connection context
+- how to retrieve replies
+- how to handle errors

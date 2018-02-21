@@ -1,0 +1,66 @@
+#------------------------------------------------------------------------------
+# description: execute SQL query on provided connection context
+# inputs: $1=<sqlite connection context> $2=<sql query> $3=<results>
+# outputs: store results in nameref
+# exit: 0=success
+#	1=connection not ready
+#	2=database is locked
+#	3=query returned error
+#------------------------------------------------------------------------------
+function sqlite_query
+{
+    #set -x
+    log_message -p debug -m "call sqlite_query($*)"
+    typeset -n _conn=$1
+    typeset _query=$2
+    typeset -n _results=$3
+    typeset _char		# character buffer
+    typeset _line		# line buffer
+    typeset _firstline=1
+    typeset _newline=$'\n'
+
+    # check readiness
+    if (( _conn.ready == 0 )) ; then
+	return 1
+    fi
+    
+    # execute SQL query
+    _conn.ready=0
+    print -u${_conn.ifd} -- "${_query}"
+
+    # initialize
+    _line=""
+    _results=""
+    # start reading output. skip first line
+    while read -u ${_conn.ofd} -r -N 1 _char ; do
+	# append _char to _line
+	_line+="${_char}"
+	if [[ $_char == $_newline ]] ; then
+	    # got '\n' means end of line
+	    # if this is 1st line, discard. otherwise append to _results
+	    if (( _firstline == 1 )) ; then
+		_firstline=0
+	    else
+		_results+="${_line}"
+	    fi
+	    # reset line buffer
+	    _line=""
+	else
+	    # check for sqlite> prompt
+	    if [[ $_line == *"sqlite> " ]] ; then
+		# set connection to ready and break out of read loop
+		_conn.ready=1
+		break
+	    fi
+	fi
+    done
+
+    # check _results for Error conditions
+    if [[ $_results == Error:*"database is locked"* ]] ; then
+	return 2
+    elif [[ $_results == Error:* ]] ; then
+	return 3
+    fi
+    return 0
+}
+

@@ -1,0 +1,46 @@
+#------------------------------------------------------------------------------
+# description: open sqlite connection
+# inputs: $1=<path to db file> $2=<connection context variable>
+# outputs: none
+# exit: 0=success
+#------------------------------------------------------------------------------
+function sqlite_open
+{
+    log_message -p debug -m "call sqlite_open($*)"
+    typeset _dbfile=$1	# path to sqlite file
+    typeset -n _conn=$2	# nameref to sqlite context
+    typeset -i ifd	# input file descriptor
+    typeset -i ofd	# output file descriptor
+    typeset _char	# character buffer
+    typeset _line	# line buffer
+    typeset _newline=$'\n'	# newline character
+
+    $SQLITE -interactive ${_dbfile} 2>&1 |&
+    _conn.pid=$!
+
+    # redirect stdin/out to available fd
+    exec {ifd}>&p {ofd}<&p
+    _conn.ifd=${ifd}
+    _conn.ofd=${ofd}
+    # initialize context as NOT ready for input
+    _conn.ready=0
+
+    # prepare connection for input
+    while (( _conn.ready == 0 )) ; do
+	read -u${_conn.ofd} -r -N 1 _char
+	# append char to line buffer
+	_line+="${_char}"
+	# check for newline
+	if [[ ${_char} == ${_newline} ]] ; then
+	    # got '\n' means end of line, reset buffer
+	    _line=""
+	else
+	    # not '\n', check for "sqlite> " prompt
+	    if [[ ${_line} == *"sqlite> " ]] ; then
+		# sqlite is ready for input
+		_conn.ready=1
+	    fi
+	fi
+    done
+    return 0
+}

@@ -1,0 +1,19 @@
+#------------------------------------------------------------------------------
+# description: close sqlite connection
+# inputs: $1=<sqlite connection context>
+# outputs: 
+# exit: 0=success
+#------------------------------------------------------------------------------
+function sqlite_close
+{
+    log_message -p debug -m "call sqlite_close($*)"
+    typeset -n _conn=$1
+
+    # close stdin/out
+    exec {_conn.ifd}>&-
+    exec {_conn.ofd}<&-
+
+    # kill the sqlite process
+    #$KILL ${_conn.pid}
+    return 0
+}
