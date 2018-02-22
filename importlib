@@ -36,8 +36,6 @@ function importlib
 		# already exist
 		if (( $_found == 0 )) ; then
 		    FPATH=$FPATH:${_fpath_new}
-		else
-		    print -u2 "${_fpath_new} already in FPATH"
 		fi
 	    done
 	    IFS=$OIFS

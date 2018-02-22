@@ -1,18 +1,17 @@
 #!/bin/ksh
 
 # must define FPATH so we can use sqlite_* functions
-FPATH=.
-export FPATH
+FPATH=/usr/share/kshlib
+importlib logging sqlite3
 
+# define external program references
 SQLITE=/usr/bin/sqlite3
-KILL=/bin/kill
+DATE=/bin/date
 
+# define variables
+OPT_log_level=2
+PID=$$
 NL=$'\n'
-
-function log_message
-{
-    return
-}
 
 typeset -C sqlite_conn=(
 	integer pid
@@ -25,7 +24,6 @@ typeset -C sqlite_conn=(
 ## open pipe to sqlite in functions
 ##
 print "Using pipe to sqlite in functions"
-#sqlite_open -f /var/lib/pcapfiledb/pcapfile.sqlite3 -c sqlite_conn
 sqlite_open /var/lib/pcapfiledb/pcapfile.sqlite3 sqlite_conn
 print "sqlite_conn=${sqlite_conn}"
 
@@ -47,9 +45,6 @@ do
 
 	while (( $got_answer == 0 ))
 	do
-		#print -u${sqlite_conn.ifd} -- "SELECT COUNT(file) FROM filedb WHERE file == \"${file}\";"
-		#read -t 1 -u${sqlite_conn.ofd} -r answer
-		#sqlite_query -c sqlite_conn -q "SELECT COUNT(file) FROM filedb WHERE file == \"${file}\";" -r answer
 		sqlite_query sqlite_conn "SELECT COUNT(file) FROM filedb WHERE file == \"${file}\";" answer
 
 		if [[ $answer == 0${NL} ]] ; then
@@ -75,7 +70,6 @@ print "stopping pipe benchmark: ${end}"
 duration=$(echo "$end - $start" | bc)
 print "total duration = ${duration}"
 
-#sqlite_close -c sqlite_conn
 sqlite_close sqlite_conn
 
 ##

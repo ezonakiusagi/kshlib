@@ -3,16 +3,16 @@
 # example sqlite wrapper using sqlite functions
 
 # must define FPATH so we can use sqlite_* functions
-FPATH=.
-export FPATH
+FPATH=/usr/share/kshlib
+importlib sqlite3 logging
 
+# define references to external programs
 SQLITE=/usr/bin/sqlite3
-KILL=/bin/kill
+DATE=/bin/date
 
-function log_message
-{
-    return
-}
+# define some vars
+OPT_log_level=2
+PID=$$
 
 typeset -C dbc=(
     integer pid
@@ -21,7 +21,6 @@ typeset -C dbc=(
     integer ready
 )
 
-#sqlite_open -f ${1} -c dbc
 sqlite_open ${1} dbc
 
 quit=0
@@ -30,7 +29,6 @@ while (( quit == 0 )) ; do
     if [[ $input == end ]] ; then
 	quit=1
     else
-	#sqlite_query -c dbc -q "$input" -r results
 	sqlite_query dbc "$input" results
 	ret=$?
 	if (( $ret != 0 )) ; then
@@ -44,5 +42,4 @@ while (( quit == 0 )) ; do
     fi
 done
 
-#sqlite_close -c dbc
 sqlite_close dbc

@@ -13,7 +13,5 @@ function sqlite_close
     exec {_conn.ifd}>&-
     exec {_conn.ofd}<&-
 
-    # kill the sqlite process
-    #$KILL ${_conn.pid}
     return 0
 }

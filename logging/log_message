@@ -1,0 +1,54 @@
+#------------------------------------------------------------------------------
+# description: general logging function
+# globals: expects OPT_log_level, PID, DATE
+#	    if LOG is defined, messages are printed to $LOG. otherwise,
+#	    messages are printed to stdout.
+# inputs: -p [1-4,crit,normal,verbose,debug] -m "log message"
+# outputs: write log message to log file
+# return: 0=good, >0=problem
+#------------------------------------------------------------------------------
+function log_message
+{
+    # localize internal variables
+    typeset _log_priority
+    typeset _message
+
+    while getopts :p:m: inputs
+    do
+	case $inputs in
+	    p) _log_priority=$OPTARG ;;
+	    m) _message="$OPTARG" ;;
+	    *) ;;
+	esac
+    done
+
+    # we allow _log_priority to be numeric (1-4) or symbolic
+    # but we internally convert symbolic to numeric here
+    if [[ ${_log_priority} != ?(-)+([[:digit:]]) ]] ; then
+	case ${_log_priority} in
+	    crit|critical)  _log_priority=1 ;;
+	    norm|normal)    _log_priority=2 ;;
+	    verbose)	    _log_priority=3 ;;
+	    debug)	    _log_priority=4 ;;
+	    *)	exit_on_error "log_message(): invalid priority ${_log_priority}"
+		;;
+	esac
+    fi
+
+    # check that we are in reasonable range 1-4
+    if (( ${_log_priority} < 0 )) || (( ${_log_priority} > 4 )) ; then
+	exit_on_error "log_message(): log_priority ${_log_priority} is out of range"
+    fi
+
+    # only log message if ${_log_priority} < $OPT_log_level
+    if (( ${_log_priority} <= ${OPT_log_level} )) ; then
+	# set timestamp
+	TIMESTAMP=$($DATE +"%Y.%m.%d (%a) %H:%M:%S %Z")
+	if [[ -z $LOG ]] ; then
+	    print -- "[${TIMESTAMP}][PID=$PID] ${_message}"
+	else
+	    print -- "[${TIMESTAMP}][PID=$PID] ${_message}" >> $LOG
+	fi
+    fi
+    return 0
+}
