@@ -6,17 +6,17 @@ variables:
   ARTIFACTORY_URL: "https://artifactory.mtd.cisco-services.com/artifactory"
   ARTIFACTORY_CMD: "curl -i -k -H 'Authorization: Bearer $ARTIFACTORY_TOKEN'"
   # Don't Make changes in following file name as this is strictly for RPM artifactory NOT YET in operation. 
-  RPM_FILENAME: pcapfiledb-0.6-1.el7.noarch.rpm
+  RPM_FILENAME: kshlib-0.6-1.el7.noarch.rpm
   
 
   # ------------Copy RPM ---------------
   TEST_REPO_RPM_PATH: /mnt/repo01/repos/test/ata3
   TEST_REPO_RPM_PATH_EXISTS: "[ -d /mnt/repo01/repos/test/ata3 ]"
   LOCAL_BUILD_RPM_PATH: RPMS/noarch
-  RPM_FILENAME_REGEX: pcapfiledb-*$${ver}*.rpm
-  RPM_HEALTHCHECK_FILENAME_REGEX: pcapfiledb-healthcheck-*$${health_ver}*.rpm
+  RPM_FILENAME_REGEX: kshlib-*$${ver}*.rpm
+  RPM_HEALTHCHECK_FILENAME_REGEX: kshlib-healthcheck-*$${health_ver}*.rpm
   #RPM_DEBUG_FILENAME_REGEX:
-  RPM_FILE_LOCATION_DEV_TEST: /mnt/repo01/repos/test/ata3/pcapfiledb-*$${ver}*.rpm
+  RPM_FILE_LOCATION_DEV_TEST: /mnt/repo01/repos/test/ata3/kshlib-*$${ver}*.rpm
 
   #-----DEV Deployment--------------------
   DEV_ATA3_INVENTORY_FILE: ata3_hosts
@@ -37,9 +37,8 @@ variables:
 before_script:
   # helpful runner details
   - pwd && ifconfig | grep inet && uptime && free -m && df -h && ls -al && env && which mvn && mvn -version && git status && git log -n 5
-  #- export ver=`awk '$1=="Version:" {print $2}' pcapfiledb.spec`
-  - export ver=`awk '$1=="Version:" {print $2}' pcapfiledb.spec | head -1`
-  - export health_ver=`awk '$1=="Version:" {print $2}' pcapfiledb.spec | sed -n -e '2,2p'`
+  - export ver=`awk '$1=="Version:" {print $2}' kshlib.spec | head -1`
+  - export health_ver=`awk '$1=="Version:" {print $2}' kshlib.spec | sed -n -e '2,2p'`
 
   # set environment variables used by jobs
   - export DEV_DEPLOY_CMD=""
@@ -73,8 +72,8 @@ before_script:
   - export ATA3_CMD="cd ~/build/ata3-ansible && sudo ./playbook.sh ${INVENTORY_FILENAME}"
 
   - if [[ $CI_PROJECT_URL == *"alln-dev-gitlab.mtd.cisco-services.com"* ]]; then export GITLAB_PUSH_CMD="git checkout customer_exclude && git pull && git push ${DEV_GIT_PUSH_TO_PROD_CUSTOMER_EXCLUDE} customer_exclude"; fi
-  - if [[ $CI_PROJECT_URL == *"alln-dev-gitlab.mtd.cisco-services.com"* ]]; then export DEV_DEPLOY_CMD="sudo ./playbook.sh ${INVENTORY_FILENAME} pcapfiledb service=pcapfiledb"; fi
-  #- if [[ $CI_PROJECT_URL == *"alln-prod-gitlab.mtd.cisco-services.com"* ]]; then export PROD_DEPLOY_CMD="sudo ./playbook.sh ${INVENTORY_FILENAME} pcapfiledb098 service=pcapfiledb098 -e customer_exclude_git_url=${PROD_PLAYRUNNER_GITLAB_URL} --limit wkr2"; fi
+  - if [[ $CI_PROJECT_URL == *"alln-dev-gitlab.mtd.cisco-services.com"* ]]; then export DEV_DEPLOY_CMD="sudo ./playbook.sh ${INVENTORY_FILENAME} kshlib service=kshlib"; fi
+  #- if [[ $CI_PROJECT_URL == *"alln-prod-gitlab.mtd.cisco-services.com"* ]]; then export PROD_DEPLOY_CMD="sudo ./playbook.sh ${INVENTORY_FILENAME} kshlib098 service=kshlib098 -e customer_exclude_git_url=${PROD_PLAYRUNNER_GITLAB_URL} --limit wkr2"; fi
 
   - echo "DEV_DEPLOY_CMD=${DEV_DEPLOY_CMD}"
   #- echo "PROD_DEPLOY_CMD=${PROD_DEPLOY_CMD}"
@@ -92,19 +91,19 @@ build:
   script:
     - echo "Build Stage"
     - ls -la
-    - echo pcapfiledb-${ver}
+    - echo kshlib-${ver}
     - cd ..
     # Clean up anything which is leftover from last build.
-    - rm -rf pcapfiledb-${ver}
+    - rm -rf kshlib-${ver}
     - ls -lart
     - pwd
     - export NEW_CURRENT_DIR=`pwd`
-    - mv pcapfiledb pcapfiledb-${ver}
-    - rm -rf pcapfiledbbuild/SOURCES
-    - mkdir -p pcapfiledbbuild/SOURCES
-    - tar zcf pcapfiledbbuild/SOURCES/pcapfiledb-$ver.tar.gz --exclude=.git pcapfiledb-$ver
-    - cd pcapfiledb-$ver
-    - rpmbuild -ta --define '_topdir %{expand:%%(pwd)}' --define 'dist .el7' ../pcapfiledbbuild/SOURCES/pcapfiledb-$ver.tar.gz ### build the  rpms
+    - mv kshlib kshlib-${ver}
+    - rm -rf kshlibbuild/SOURCES
+    - mkdir -p kshlibbuild/SOURCES
+    - tar zcf kshlibbuild/SOURCES/kshlib-$ver.tar.gz --exclude=.git kshlib-$ver
+    - cd kshlib-$ver
+    - rpmbuild -ta --define '_topdir %{expand:%%(pwd)}' --define 'dist .el7' ../kshlibbuild/SOURCES/kshlib-$ver.tar.gz ### build the  rpms
     - pwd
     - ls -lrt RPMS/noarch/
     - /usr/bin/md5sum $LOCAL_BUILD_RPM_PATH/$RPM_FILENAME
@@ -118,13 +117,11 @@ build:
     - echo "CMD_UPDATE_TEST_REPO_METADATA=$CMD_UPDATE_TEST_REPO_METADATA"
     - eval $CMD_UPDATE_TEST_REPO_METADATA
     - cd ${NEW_CURRENT_DIR}
-    - mv pcapfiledb-${ver} pcapfiledb
+    - mv kshlib-${ver} kshlib
 
 test:
   stage: test
   tags:
-    # - BUILD
-    # - pcapfiledb
     - brogge
   script:
     - echo "Build Test"
@@ -136,8 +133,6 @@ test:
   only:
     - Feature-MKR-11551
   tags:
-    # - BUILD
-    # - pcapfiledb
     - brogge
   script:
     - echo "Deploy to lower level environments"
