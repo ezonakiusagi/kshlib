@@ -55,5 +55,5 @@ This is a library of useful ksh93 functions.
 %attr(755,root,root) /usr/share/%{name}/tools/sqlite-benchmark.ksh
 
 %changelog
-* Wed Feb  7 2018 Bond Masuda <bond.masuda@jlbond.com> - 0.1-1
+* Wed Feb  7 2018 Ezonakiusagi - 0.1-1
 - release 0.1
