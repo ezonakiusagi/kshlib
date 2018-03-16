@@ -54,7 +54,7 @@ before_script:
   - export CMD_UPDATE_TEST_REPO_METADATA="cd ${TEST_REPO_RPM_PATH} && sudo /usr/bin/createrepo --update ${TEST_REPO_RPM_PATH}; sudo /usr/bin/chown -R 6001:100 ${TEST_REPO_RPM_PATH}"
   - echo "CMD_UPDATE_TEST_REPO_METADATA=$CMD_UPDATE_TEST_REPO_METADATA"
   
-  - export CMD_COPY_HEALTH_RPM_TO_TEST_REPO="sudo /usr/bin/cp -f ${LOCAL_BUILD_RPM_PATH}/${RPM_HEALTHCHECK_FILENAME_REGEX} /mnt/repo01/repos/test/ata3/"
+  # - export CMD_COPY_HEALTH_RPM_TO_TEST_REPO="sudo /usr/bin/cp -f ${LOCAL_BUILD_RPM_PATH}/${RPM_HEALTHCHECK_FILENAME_REGEX} /mnt/repo01/repos/test/ata3/"
 
 
 
@@ -109,8 +109,8 @@ build:
     - /usr/bin/md5sum $LOCAL_BUILD_RPM_PATH/$RPM_FILENAME
     - echo "CMD_COPY_RPM_TO_TEST_REPO=$CMD_COPY_RPM_TO_TEST_REPO"
     - eval $CMD_COPY_RPM_TO_TEST_REPO
-    - echo "$CMD_COPY_HEALTH_RPM_TO_TEST_REPO"
-    - eval $CMD_COPY_HEALTH_RPM_TO_TEST_REPO
+    #- echo "$CMD_COPY_HEALTH_RPM_TO_TEST_REPO"
+    #- eval $CMD_COPY_HEALTH_RPM_TO_TEST_REPO
     - export RPM_FILE_LIST=`ls $LOCAL_BUILD_RPM_PATH/*.rpm`
     #- echo $RPM_FILE_LIST
     - for i in $RPM_FILE_LIST; do echo "";echo "********** PUSHING FILE $i IN TO ARTIFACTORY **************"; echo ""; echo ""; echo "$ARTIFACTORY_CMD -T $i -XPUT $ARTIFACTORY_URL/$ARTIFACTORY_REPO/"; echo ""; eval "$ARTIFACTORY_CMD -T $i -XPUT $ARTIFACTORY_URL/$ARTIFACTORY_REPO/"; done
