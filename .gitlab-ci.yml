@@ -6,7 +6,7 @@ variables:
   ARTIFACTORY_URL: "https://artifactory.mtd.cisco-services.com/artifactory"
   ARTIFACTORY_CMD: "curl -i -k -H 'Authorization: Bearer $ARTIFACTORY_TOKEN'"
   # Don't Make changes in following file name as this is strictly for RPM artifactory NOT YET in operation. 
-  RPM_FILENAME: kshlib-0.6-1.el7.noarch.rpm
+  RPM_FILENAME: kshlib-0.1-1.el7.noarch.rpm
   
 
   # ------------Copy RPM ---------------
