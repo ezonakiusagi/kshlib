@@ -1,0 +1,20 @@
+# this borrowed from:
+# https://blog.fpmurphy.com/2009/02/khs93-bit-manipulation.html
+
+function inet_aton
+{
+    OIFS=$IFS
+    IFS="."
+    typeset -a IParr=($1)
+    IFS=$OIFS
+
+    typeset -i2 ip1=${IParr[0]}
+    typeset -i2 ip2=${IParr[1]}
+    typeset -i2 ip3=${IParr[2]}
+    typeset -i2 ip4=${IParr[3]}
+
+    typeset -ui2 d=$(( (ip1 << 24) | (ip2 << 16) | (ip3 << 8 ) | ip4 ))
+
+    print "$((d))"
+    return
+}
